@@ -7,7 +7,7 @@ A full-stack issue tracker built with the Next.js App Router, featuring Google a
 - Next.js 16 (App Router, Turbopack)
 - React 19
 - TypeScript
-- Prisma ORM + PostgreSQL
+- Prisma ORM + PostgreSQL(Supabase)
 - Auth.js (NextAuth v5) — Google OAuth
 - @tanstack/react-query — client-side data fetching (assignee select)
 - Radix UI Themes — UI components
