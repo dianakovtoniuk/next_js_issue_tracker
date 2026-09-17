@@ -6,6 +6,9 @@ import 'easymde/dist/easymde.min.css'
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import createIssueSchema from "@/app/validationSchemas";
+import Spinner from "@/app/components/spinner";
 
 interface IIsueForm {
     title: string;
@@ -16,18 +19,23 @@ interface IIsueForm {
 function NewIssuePage() {
 
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const router = useRouter();
 
-    const { register, control, handleSubmit } = useForm<IIsueForm>();
+    const { register, control, handleSubmit } = useForm<IIsueForm>({
+        resolver: zodResolver(createIssueSchema)
+    });
 
     const onSubmit = handleSubmit(async (data) => {
         try {
-        await axios.post('/api/issues', data);
-        router.push('/issues');
+            setIsSubmitting(true);
+            await axios.post('/api/issues', data);
+            router.push('/issues');
         } catch (error) {
-        console.error(error);
-        setError('Unexpected error')
+            setIsSubmitting(false);
+            console.error(error);
+            setError('Unexpected error');
         }
     });
 
@@ -40,7 +48,9 @@ function NewIssuePage() {
 
             <Controller name="description" control={control} render={({ field }) => <SimpleMde placeholder="Description" {...field} />} />
 
-            <Button>Submit</Button>
+            <Button>Submit
+                {isSubmitting && <Spinner />}
+            </Button>
         </form>
     </div>
   )
