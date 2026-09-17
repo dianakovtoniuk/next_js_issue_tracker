@@ -1,7 +1,7 @@
-'use client'
 import {Button, Table} from "@radix-ui/themes";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import IssueStatusBadge from "../components/issueStatusBadge";
 
 
 async function IssuesPage() {
@@ -11,7 +11,7 @@ async function IssuesPage() {
   return (
     <div>
 
-        <div>
+        <div className="mb-4">
            <Button>
                 <Link href='issues/new'>New Issue</Link>
             </Button> 
@@ -31,8 +31,17 @@ async function IssuesPage() {
                 {
                     issues.map((el: any) => (
                         <Table.Row key={el.id}>
-                            <Table.Cell className="hidden md:table-cell">{el.title}</Table.Cell>
-                            <Table.Cell className="hidden md:table-cell">{el.status}</Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
+                                <Link href={`/issues/${el.id}`}>
+                                    {el.title}
+                                </Link>
+                                <div className="block md:hidden">
+                                    <IssueStatusBadge status={el.status} />
+                                </div>
+                            </Table.Cell>
+                            <Table.Cell className="hidden md:table-cell">
+                                <IssueStatusBadge status={el.status} />
+                            </Table.Cell>
                             <Table.Cell className="hidden md:table-cell">{el.createdAt.toDateString()}</Table.Cell>
                         </Table.Row>
                     ))
