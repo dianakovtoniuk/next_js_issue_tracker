@@ -5,6 +5,8 @@ import IssueStatusBadge from "@/app/components/issueStatusBadge";
 import ReactMarkdown from "react-markdown";
 import EditIssueButton from "./editIssueButton";
 import DeleteIssueButton from "./deleteIssueButton";
+import AssigneeSelect from "./assigneeSelect";
+import { auth } from "@/lib/auth";
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -12,6 +14,8 @@ interface Props {
 
 async function IssueDetailPage({ params }: Props) {
     const { id } = await params;
+
+    const session = await auth();
 
     const issue = await prisma.issue.findUnique({
         where: { id: parseInt(id) },
@@ -32,12 +36,15 @@ async function IssueDetailPage({ params }: Props) {
                 </Card>
             </Box>
 
-            <Box>
-                <Flex direction="column" gap="4">
-                    <EditIssueButton issueId={issue.id} />
-                    <DeleteIssueButton issueId={issue.id} />
-                </Flex>
-            </Box>
+            {session && (
+                <Box>
+                    <Flex direction="column" gap="4">
+                        <AssigneeSelect issue={issue} />
+                        <EditIssueButton issueId={issue.id} />
+                        <DeleteIssueButton issueId={issue.id} />
+                    </Flex>
+                </Box>
+            )}
         </Grid>
     );
 }
