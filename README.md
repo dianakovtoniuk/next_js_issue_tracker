@@ -2,6 +2,8 @@
 
 A full-stack issue tracker built with the Next.js App Router, featuring Google authentication, assignee management, and a dashboard.
 
+Running: https://next-js-issue-tracker-rho.vercel.app/
+
 ## Tech Stack
 
 - Next.js 16 (App Router, Turbopack)
