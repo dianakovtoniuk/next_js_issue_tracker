@@ -1,55 +1,52 @@
-import {Button, Table} from "@radix-ui/themes";
-import Link from "next/link";
-import prisma from "@/lib/prisma";
-import IssueStatusBadge from "../components/issueStatusBadge";
+import prisma from '@/lib/prisma';
+import { Status } from '@prisma/client';
+import { Flex } from '@radix-ui/themes';
+import { Metadata } from 'next';
+import IssueActions from './_components/issueActions';
+import IssueTable, { IssueQuery, columnNames } from './_components/issueTable';
+import Pagination from '@/app/components/pagination';
 
+interface Props {
+  searchParams: Promise<IssueQuery>;
+}
 
-async function IssuesPage() {
+const IssuesPage = async ({ searchParams }: Props) => {
+  const params = await searchParams;
 
-    const issues = await prisma.issue.findMany();
+  const statuses = Object.values(Status);
+  const status = statuses.includes(params.status) ? params.status : undefined;
+  const where = { status };
+
+  const orderBy = columnNames.includes(params.orderBy)
+    ? { [params.orderBy]: 'asc' as const }
+    : undefined;
+
+  const page = parseInt(params.page) || 1;
+  const pageSize = 10;
+
+  const issues = await prisma.issue.findMany({
+    where,
+    orderBy,
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
+
+  const issueCount = await prisma.issue.count({ where });
 
   return (
-    <div>
+    <Flex direction="column" gap="3">
+      <IssueActions />
+      <IssueTable searchParams={params} issues={issues} />
+      <Pagination pageSize={pageSize} currentPage={page} itemCount={issueCount} />
+    </Flex>
+  );
+};
 
-        <div className="mb-4">
-           <Button>
-                <Link href='issues/new'>New Issue</Link>
-            </Button> 
-        </div>
-        
+export const dynamic = 'force-dynamic';
 
-        <Table.Root variant="surface">
-            <Table.Header>
-                <Table.Row>
-                    <Table.ColumnHeaderCell className="hidden md:table-cell">Issue</Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell className="hidden md:table-cell">Status</Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell className="hidden md:table-cell">Created at</Table.ColumnHeaderCell>
-                </Table.Row>
-            </Table.Header>
-
-            <Table.Body>
-                {
-                    issues.map((el: any) => (
-                        <Table.Row key={el.id}>
-                            <Table.Cell className="hidden md:table-cell">
-                                <Link href={`/issues/${el.id}`}>
-                                    {el.title}
-                                </Link>
-                                <div className="block md:hidden">
-                                    <IssueStatusBadge status={el.status} />
-                                </div>
-                            </Table.Cell>
-                            <Table.Cell className="hidden md:table-cell">
-                                <IssueStatusBadge status={el.status} />
-                            </Table.Cell>
-                            <Table.Cell className="hidden md:table-cell">{el.createdAt.toDateString()}</Table.Cell>
-                        </Table.Row>
-                    ))
-                }
-            </Table.Body>
-        </Table.Root>
-    </div>
-  )
-}
+export const metadata: Metadata = {
+  title: 'Issue Tracker - Issue List',
+  description: 'View all project issues',
+};
 
 export default IssuesPage;
